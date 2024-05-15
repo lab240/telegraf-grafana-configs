@@ -1,0 +1,1037 @@
+ELEMY-CCU1001-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+    Unsigned32, Integer32
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION
+        FROM SNMPv2-TC
+    YesNo, ContactType, NoneOnOff, OnOff,
+    Float16x10, elmCcu
+        FROM ELEMY-MIB
+    SnmpAdminString
+        FROM SNMP-FRAMEWORK-MIB;
+-- END IMPORTS
+
+
+elmCcu1001 MODULE-IDENTITY
+    LAST-UPDATED "202304170529Z"
+    ORGANIZATION "Elemy LLC"
+    CONTACT-INFO "Voronov Vadim"
+    DESCRIPTION  "Device Model CCU-1001"
+    REVISION "202304170529Z"
+    DESCRIPTION  ""
+    ::= {elmCcu 1}
+
+-- *****************************************************************************
+-- Shared Types
+-- *****************************************************************************
+
+DiFunction ::= INTEGER {
+    none      (0),
+    frontDoor (1),
+    rearDoor  (2),
+    rackOff   (3),
+    equipOff  (4)
+}
+
+DoFunction ::= INTEGER {
+    off               (0),
+    on                (1),
+    heater            (2),
+    fan               (3),
+    airConditioner    (4),
+    equipPower        (5),
+    hasActiveAlarms   (6),
+    hasActiveWarnings (7),
+    hasRaisedAlarms   (8),
+    hasRaisedWarnings (9),
+    hasNoAckAlarms    (10),
+    hasNoAckWarnings  (11)
+}
+
+RackClimateWorkMode ::= INTEGER {
+    none   (0),
+    auto   (1),
+    off    (2),
+    heater (3),
+    fan    (4),
+    airCon (5)
+}
+
+RackClimateSensors ::= INTEGER {
+    none    (0),
+    T0      (1),
+    T1      (2),
+    T0orT1  (3),
+    T0andT1 (4)
+}
+
+EquipPowerWorkMode ::= INTEGER {
+    none (0),
+    auto (1),
+    off  (2),
+    on   (3)
+}
+
+EquipPowerSensors ::= INTEGER {
+    none    (0),
+    T0      (1),
+    T1      (2),
+    T0orT1  (3),
+    T0andT1 (4)
+}
+
+SensorStatus ::= INTEGER {
+    ok        (0),
+    readError (1),
+    noAnswer  (2)
+}
+
+AlarmSeverity ::= INTEGER {
+    event   (1),
+    warning (2),
+    alarm   (3)
+}
+
+AlarmState ::= INTEGER {
+    none           (0),
+    warningCleared (2),
+    alarmCleared   (3),
+    eventActive    (5),
+    warningActive  (6),
+    alarmActive    (7),
+    warningAck     (14),
+    alarmAck       (15)
+}
+
+-- *****************************************************************************
+-- Objects
+-- *****************************************************************************
+
+elmCcuStatus OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Device status"
+    ::= {elmCcu1001 1}
+
+elmCcuHasAlarms OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of alarms on the device."
+    ::= {elmCcuStatus 1}
+
+elmCcuHasWarnings OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of warnings on the device."
+    ::= {elmCcuStatus 2}
+
+elmCcuHasOverrides OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of overrides on the device."
+    ::= {elmCcuStatus 3}
+
+elmCcuStmAlarmState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm state of sensors polling module."
+    ::= {elmCcuStatus 4}
+
+
+elmCcuTraps OBJECT IDENTIFIER
+    ::= {elmCcu1001 2}
+
+elmCcuTrapConfigChanged NOTIFICATION-TYPE
+    STATUS       current
+    DESCRIPTION  "Device settings changed"
+    ::= {elmCcuTraps 1}
+
+elmCcuTrapDiStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuDiCurState, elmCcuDiCurStateAlarm}
+    STATUS       current
+    DESCRIPTION  "Digital input state changed"
+    ::= {elmCcuTraps 2}
+
+elmCcuTrapDoStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuDoCurState}
+    STATUS       current
+    DESCRIPTION  "Digital output state changed"
+    ::= {elmCcuTraps 3}
+
+elmCcuTrapVSensorTresholdAlarm NOTIFICATION-TYPE
+    OBJECTS      {elmCcuVSensorCurVoltage, elmCcuVSensorCurVoltTresholdAlarmState}
+    STATUS       current
+    DESCRIPTION  "Voltage out of sensor settings"
+    ::= {elmCcuTraps 4}
+
+elmCcuTrapTSensorTresholdAlarm NOTIFICATION-TYPE
+    OBJECTS      {elmCcuThSensorCurTemperature, elmCcuThSensorCurTempTresholdAlarmState}
+    STATUS       current
+    DESCRIPTION  "Temperature out of the sensor settings"
+    ::= {elmCcuTraps 5}
+
+elmCcuTrapHSensorTresholdAlarm NOTIFICATION-TYPE
+    OBJECTS      {elmCcuThSensorCurHumidity, elmCcuThSensorCurHumiTresholdAlarmState}
+    STATUS       current
+    DESCRIPTION  "Humidity out of sensor settings"
+    ::= {elmCcuTraps 6}
+
+elmCcuTrapStmStatusChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuStmAlarmState}
+    STATUS       current
+    DESCRIPTION  "The status of the sensor polling module has changed"
+    ::= {elmCcuTraps 7}
+
+elmCcuTrapVSensorStatusChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuVSensorCurStatus}
+    STATUS       current
+    DESCRIPTION  "The status of the voltage sensor has changed"
+    ::= {elmCcuTraps 8}
+
+elmCcuTrapThSensorStatusChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuThSensorCurStatus}
+    STATUS       current
+    DESCRIPTION  "The status of the temperature and humidity sensor has changed"
+    ::= {elmCcuTraps 9}
+
+elmCcuTrapEquipPowerStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuEquipPwCurPowerState}
+    STATUS       current
+    DESCRIPTION  "The power state of the equipment has changed"
+    ::= {elmCcuTraps 10}
+
+elmCcuTrapEquipAlarmStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuEquipPwCurTempTresholdAlarmState}
+    STATUS       current
+    DESCRIPTION  "Temperature out of equipment operation settings"
+    ::= {elmCcuTraps 11}
+
+elmCcuTrapEquipErrorStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuEquipPwCurTempSensorsErrorState}
+    STATUS       current
+    DESCRIPTION  "Conflict of indications or incorrect setting of equipment
+        climate control sensors"
+    ::= {elmCcuTraps 12}
+
+elmCcuTrapRackAlarmStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuRackClCurTempAlarmState}
+    STATUS       current
+    DESCRIPTION  "Temperature exceeding rack operation settings"
+    ::= {elmCcuTraps 13}
+
+elmCcuTrapRackErrorStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuRackClCurTempErrorState}
+    STATUS       current
+    DESCRIPTION  "Conflict of readings or incorrect setting of cabinet climate
+        control sensors"
+    ::= {elmCcuTraps 14}
+
+elmCcuTrapRackWorkStateChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuRackClCurHeaterState, elmCcuRackClCurFanState, elmCcuRackClCurAirConState}
+    STATUS       current
+    DESCRIPTION  "Changing the current operating mode of climate control units"
+    ::= {elmCcuTraps 15}
+
+elmCcuTrapHasOverridesChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuHasOverrides}
+    STATUS       current
+    DESCRIPTION  "Has any override settings"
+    ::= {elmCcuTraps 16}
+
+elmCcuTrapHasAlarmsChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuHasAlarms}
+    STATUS       current
+    DESCRIPTION  "Has any active alarms"
+    ::= {elmCcuTraps 17}
+
+elmCcuTrapHasWarningsChanged NOTIFICATION-TYPE
+    OBJECTS      {elmCcuHasWarnings}
+    STATUS       current
+    DESCRIPTION  "Has any active warnings"
+    ::= {elmCcuTraps 18}
+
+elmCcuIo OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Дискретные входы/выходы."
+    ::= {elmCcu1001 3}
+
+elmCcuStateDescCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of pairs of descriptions for states of digital
+        inputs/outputs"
+    ::= {elmCcuIo 1}
+
+elmCcuStateDescTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmCcuStateDescEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table of digital inputs"
+    ::= {elmCcuIo 2}
+
+elmCcuStateDescEntry OBJECT-TYPE
+    SYNTAX       ElmCcuStateDescEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmCcuStateDescIndex}
+    ::= {elmCcuStateDescTable 1}
+
+ElmCcuStateDescEntry ::= SEQUENCE {
+    elmCcuStateDescIndex  Unsigned32,
+    elmCcuStateDescAct    SnmpAdminString,
+    elmCcuStateDescPas    SnmpAdminString
+}
+
+elmCcuStateDescIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Index"
+    ::= {elmCcuStateDescEntry 1}
+
+elmCcuStateDescAct OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Description of the digital input/output with active state."
+    ::= {elmCcuStateDescEntry 2}
+
+elmCcuStateDescPas OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Description of the digital input/output with inactive state."
+    ::= {elmCcuStateDescEntry 3}
+
+elmCcuDiCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of digital inputs."
+    ::= {elmCcuIo 3}
+
+elmCcuDiTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmCcuDiEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table of digital inputs."
+    ::= {elmCcuIo 4}
+
+elmCcuDiEntry OBJECT-TYPE
+    SYNTAX       ElmCcuDiEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmCcuDiIndex}
+    ::= {elmCcuDiTable 1}
+
+ElmCcuDiEntry ::= SEQUENCE {
+    elmCcuDiIndex             Unsigned32,
+    elmCcuDiCfgName           SnmpAdminString,
+    elmCcuDiCfgFunc           DiFunction,
+    elmCcuDiCfgType           ContactType,
+    elmCcuDiCfgStatesDescId   Unsigned32,
+    elmCcuDiCfgNormalState    NoneOnOff,
+    elmCcuDiCfgAlarmSeverity  AlarmSeverity,
+    elmCcuDiCurValue          OnOff,
+    elmCcuDiCurState          OnOff,
+    elmCcuDiCurStateDesc      SnmpAdminString,
+    elmCcuDiCurStateAlarm     AlarmState,
+    elmCcuDiOvrValue          NoneOnOff
+}
+
+elmCcuDiIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Index of digital input."
+    ::= {elmCcuDiEntry 1}
+
+elmCcuDiCfgName OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Name of digital input."
+    ::= {elmCcuDiEntry 2}
+
+elmCcuDiCfgFunc OBJECT-TYPE
+    SYNTAX       DiFunction
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input function."
+    ::= {elmCcuDiEntry 3}
+
+elmCcuDiCfgType OBJECT-TYPE
+    SYNTAX       ContactType
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input contact type."
+    ::= {elmCcuDiEntry 4}
+
+elmCcuDiCfgStatesDescId OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Descriptions of the digital input current state."
+    ::= {elmCcuDiEntry 5}
+
+elmCcuDiCfgNormalState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input normal state."
+    ::= {elmCcuDiEntry 6}
+
+elmCcuDiCfgAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input alarm severity."
+    ::= {elmCcuDiEntry 7}
+
+elmCcuDiCurValue OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input phisical state."
+    ::= {elmCcuDiEntry 8}
+
+elmCcuDiCurState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Logic state of the digital input (considering contact type
+        and override state)."
+    ::= {elmCcuDiEntry 9}
+
+elmCcuDiCurStateDesc OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Description of the current state of the digital input."
+    ::= {elmCcuDiEntry 10}
+
+elmCcuDiCurStateAlarm OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm status of the digital input."
+    ::= {elmCcuDiEntry 11}
+
+elmCcuDiOvrValue OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-write
+    STATUS       current
+    DESCRIPTION  "Override of the physical state of a discrete input."
+    ::= {elmCcuDiEntry 12}
+
+elmCcuDoCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of digital outputs."
+    ::= {elmCcuIo 5}
+
+elmCcuDoTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmCcuDoEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Discrete output table."
+    ::= {elmCcuIo 6}
+
+elmCcuDoEntry OBJECT-TYPE
+    SYNTAX       ElmCcuDoEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmCcuDoIndex}
+    ::= {elmCcuDoTable 1}
+
+ElmCcuDoEntry ::= SEQUENCE {
+    elmCcuDoIndex           Unsigned32,
+    elmCcuDoCfgName         SnmpAdminString,
+    elmCcuDoCfgFunc         DoFunction,
+    elmCcuDoCurState        OnOff,
+    elmCcuDoCurStateDescId  Unsigned32,
+    elmCcuDoCurStateDesc    SnmpAdminString,
+    elmCcuDoOvrState        NoneOnOff
+}
+
+elmCcuDoIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Discrete output index."
+    ::= {elmCcuDoEntry 1}
+
+elmCcuDoCfgName OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Discrete output name."
+    ::= {elmCcuDoEntry 2}
+
+elmCcuDoCfgFunc OBJECT-TYPE
+    SYNTAX       DoFunction
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Discrete output function."
+    ::= {elmCcuDoEntry 3}
+
+elmCcuDoCurState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Discrete output current state."
+    ::= {elmCcuDoEntry 4}
+
+elmCcuDoCurStateDescId OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Discrete output description of states."
+    ::= {elmCcuDoEntry 5}
+
+elmCcuDoCurStateDesc OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Discrete output state description."
+    ::= {elmCcuDoEntry 6}
+
+elmCcuDoOvrState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-write
+    STATUS       current
+    DESCRIPTION  "Discrete output override state."
+    ::= {elmCcuDoEntry 7}
+
+elmCcuSensors OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Датчики устройства"
+    ::= {elmCcu1001 4}
+
+elmCcuThSensorsCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of temperature and humidity sensors."
+    ::= {elmCcuSensors 1}
+
+elmCcuThSensorsTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmCcuThSensorEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table of temperature and humidity sensors."
+    ::= {elmCcuSensors 2}
+
+elmCcuThSensorEntry OBJECT-TYPE
+    SYNTAX       ElmCcuThSensorEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmCcuThSensorIndex}
+    ::= {elmCcuThSensorsTable 1}
+
+ElmCcuThSensorEntry ::= SEQUENCE {
+    elmCcuThSensorIndex                         Unsigned32,
+    elmCcuThSensorCfgName                       SnmpAdminString,
+    elmCcuThSensorCfgEnabled                    YesNo,
+    elmCcuThSensorCurTemperature                Float16x10,
+    elmCcuThSensorCurHumidity                   Float16x10,
+    elmCcuThSensorCurStatus                     SensorStatus,
+    elmCcuThSensorCfgTempTresholdLow            Float16x10,
+    elmCcuThSensorCfgTempTresholdHigh           Float16x10,
+    elmCcuThSensorCfgTempTresholdAlarmSeverity  AlarmSeverity,
+    elmCcuThSensorCurTempTresholdAlarmState     AlarmState,
+    elmCcuThSensorCfgHumiTresholdLow            Float16x10,
+    elmCcuThSensorCfgHumiTresholdHigh           Float16x10,
+    elmCcuThSensorCfgHumiTresholdAlarmSeverity  AlarmSeverity,
+    elmCcuThSensorCurHumiTresholdAlarmState     AlarmState
+}
+
+elmCcuThSensorIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Sensor index."
+    ::= {elmCcuThSensorEntry 1}
+
+elmCcuThSensorCfgName OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sensor index."
+    ::= {elmCcuThSensorEntry 2}
+
+elmCcuThSensorCfgEnabled OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sensor enabled or disabled."
+    ::= {elmCcuThSensorEntry 3}
+
+elmCcuThSensorCurTemperature OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temperature."
+    ::= {elmCcuThSensorEntry 4}
+
+elmCcuThSensorCurHumidity OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Humidity."
+    ::= {elmCcuThSensorEntry 5}
+
+elmCcuThSensorCurStatus OBJECT-TYPE
+    SYNTAX       SensorStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sensor status."
+    ::= {elmCcuThSensorEntry 6}
+
+elmCcuThSensorCfgTempTresholdLow OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temperature low set point."
+    ::= {elmCcuThSensorEntry 7}
+
+elmCcuThSensorCfgTempTresholdHigh OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temperature high set point."
+    ::= {elmCcuThSensorEntry 8}
+
+elmCcuThSensorCfgTempTresholdAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm severity of exceeding the temperature setpoints."
+    ::= {elmCcuThSensorEntry 9}
+
+elmCcuThSensorCurTempTresholdAlarmState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm state of exceeding the temperature setpoints."
+    ::= {elmCcuThSensorEntry 10}
+
+elmCcuThSensorCfgHumiTresholdLow OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Humidity low set point."
+    ::= {elmCcuThSensorEntry 11}
+
+elmCcuThSensorCfgHumiTresholdHigh OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Humidity high set point."
+    ::= {elmCcuThSensorEntry 12}
+
+elmCcuThSensorCfgHumiTresholdAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm severity of exceeding the humidity setpoints."
+    ::= {elmCcuThSensorEntry 13}
+
+elmCcuThSensorCurHumiTresholdAlarmState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm state of exceeding the humidity setpoints."
+    ::= {elmCcuThSensorEntry 14}
+
+elmCcuVSensorsCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of voltage sensors."
+    ::= {elmCcuSensors 3}
+
+elmCcuVSensorsTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmCcuVSensorEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table of voltage sensors."
+    ::= {elmCcuSensors 4}
+
+elmCcuVSensorEntry OBJECT-TYPE
+    SYNTAX       ElmCcuVSensorEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmCcuVSensorIndex}
+    ::= {elmCcuVSensorsTable 1}
+
+ElmCcuVSensorEntry ::= SEQUENCE {
+    elmCcuVSensorIndex                         Unsigned32,
+    elmCcuVSensorCurVoltage                    Float16x10,
+    elmCcuVSensorCurStatus                     SensorStatus,
+    elmCcuVSensorCfgVoltTresholdLow            Float16x10,
+    elmCcuVSensorCfgVoltTresholdHigh           Float16x10,
+    elmCcuVSensorCfgVoltTresholdAlarmSeverity  AlarmSeverity,
+    elmCcuVSensorCurVoltTresholdAlarmState     AlarmState,
+    elmCcuVSensorCfgStatusErrorSeverity        AlarmState
+}
+
+elmCcuVSensorIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Sensor index."
+    ::= {elmCcuVSensorEntry 1}
+
+elmCcuVSensorCurVoltage OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Voltage."
+    ::= {elmCcuVSensorEntry 3}
+
+elmCcuVSensorCurStatus OBJECT-TYPE
+    SYNTAX       SensorStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sensor status."
+    ::= {elmCcuVSensorEntry 4}
+
+elmCcuVSensorCfgVoltTresholdLow OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Voltage low set point."
+    ::= {elmCcuVSensorEntry 11}
+
+elmCcuVSensorCfgVoltTresholdHigh OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Voltage high set point."
+    ::= {elmCcuVSensorEntry 12}
+
+elmCcuVSensorCfgVoltTresholdAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the severity level of exceeding the voltage setpoints
+        event."
+    ::= {elmCcuVSensorEntry 13}
+
+elmCcuVSensorCurVoltTresholdAlarmState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Alarm state of exceeding the voltage setpoints."
+    ::= {elmCcuVSensorEntry 14}
+
+elmCcuVSensorCfgStatusErrorSeverity OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the severity level of a sensor failure event."
+    ::= {elmCcuVSensorEntry 15}
+
+elmCcuRackClimateControl OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Rack climate control."
+    ::= {elmCcu1001 5}
+
+elmCcuRackClCfgHasHeater OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of a heater in the rack."
+    ::= {elmCcuRackClimateControl 1}
+
+elmCcuRackClCfgHasFan OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of a fan in the rack."
+    ::= {elmCcuRackClimateControl 2}
+
+elmCcuRackClCfgHasAirCon OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Presence of a air conditioner in the rack."
+    ::= {elmCcuRackClimateControl 3}
+
+elmCcuRackClCfgWorkMode OBJECT-TYPE
+    SYNTAX       RackClimateWorkMode
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Climate control mode in the rack."
+    ::= {elmCcuRackClimateControl 4}
+
+elmCcuRackClCfgTempSensors OBJECT-TYPE
+    SYNTAX       RackClimateSensors
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sensors which using in climate control."
+    ::= {elmCcuRackClimateControl 5}
+
+elmCcuRackClCfgTempTresholdLow OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "The lower limit of the permissible temperature in the rack."
+    ::= {elmCcuRackClimateControl 6}
+
+elmCcuRackClCfgTempTresholdHigh OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "The upper limit of the permissible temperature in the rack."
+    ::= {elmCcuRackClimateControl 7}
+
+elmCcuRackClCfgTempTresholdAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the severity level of the alarm event of exceeding
+        the temperature setpoints in the rack."
+    ::= {elmCcuRackClimateControl 8}
+
+elmCcuRackClCfgTempSensorsErrorSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the severity level of the error event of temperature
+        control sensors in the rack."
+    ::= {elmCcuRackClimateControl 9}
+
+elmCcuRackClCfgTempHeaterOn OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "eneneneneenennenenenenenen."
+    ::= {elmCcuRackClimateControl 10}
+
+elmCcuRackClCfgTempHeatOff OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Heater start temperature."
+    ::= {elmCcuRackClimateControl 11}
+
+elmCcuRackClCfgTempCoolOff OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Cooling shutdown temperature (fan and air conditioner)."
+    ::= {elmCcuRackClimateControl 12}
+
+elmCcuRackClCfgTempFanOn OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Fan start temperature."
+    ::= {elmCcuRackClimateControl 13}
+
+elmCcuRackClCfgTempAirConOn OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Air conditioner start temperature."
+    ::= {elmCcuRackClimateControl 14}
+
+elmCcuRackClOvrWorkMode OBJECT-TYPE
+    SYNTAX       RackClimateWorkMode
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temporary assignment of the operating mode (does not change
+        the configuration and is not stored in ROM)."
+    ::= {elmCcuRackClimateControl 20}
+
+elmCcuRackClOvrHeaterState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temporary assignment of the heater state (does not change the
+        configuration and is not stored in ROM)."
+    ::= {elmCcuRackClimateControl 21}
+
+elmCcuRackClOvrFanState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temporary assignment of the fan state (does not change the
+        configuration and is not stored in ROM)."
+    ::= {elmCcuRackClimateControl 22}
+
+elmCcuRackClOvrAirConState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temporary assignment of the state of the air conditioner
+        (does not change the configuration and is not stored in ROM)."
+    ::= {elmCcuRackClimateControl 23}
+
+elmCcuRackClCurWorkMode OBJECT-TYPE
+    SYNTAX       RackClimateWorkMode
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Climate control operating mode."
+    ::= {elmCcuRackClimateControl 30}
+
+elmCcuRackClCurHeaterState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Current state of the heater."
+    ::= {elmCcuRackClimateControl 31}
+
+elmCcuRackClCurFanState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Fan Current Status."
+    ::= {elmCcuRackClimateControl 32}
+
+elmCcuRackClCurAirConState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Operation state of the air conditioner."
+    ::= {elmCcuRackClimateControl 33}
+
+elmCcuRackClCurTempAlarmState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "The current state of the temperature overshoot event or
+        sensor errors in the rack."
+    ::= {elmCcuRackClimateControl 34}
+
+elmCcuRackClCurTempErrorState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Sensor conflict or misconfiguration."
+    ::= {elmCcuRackClimateControl 35}
+
+
+elmCcuEquipPowerControl OBJECT IDENTIFIER
+    ::= {elmCcu1001 6}
+
+elmCcuEquipPwCfgWorkMode OBJECT-TYPE
+    SYNTAX       EquipPowerWorkMode
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Operating mode."
+    ::= {elmCcuEquipPowerControl 1}
+
+elmCcuEquipPwCfgTempSensors OBJECT-TYPE
+    SYNTAX       EquipPowerSensors
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Scheme of using sensors to control the climate of controlled
+        equipment."
+    ::= {elmCcuEquipPowerControl 2}
+
+elmCcuEquipPwCfgTempTresholdLow OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the lower limit of the permissible operating
+        temperature of the protected equipment."
+    ::= {elmCcuEquipPowerControl 3}
+
+elmCcuEquipPwCfgTempTresholdHigh OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the upper limit of the permissible operating
+        temperature of the protected equipment."
+    ::= {elmCcuEquipPowerControl 4}
+
+elmCcuEquipPwCfgTempTresholdAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the severity level of the event of exceeding the
+        operating temperature of the protected equipment."
+    ::= {elmCcuEquipPowerControl 5}
+
+elmCcuEquipPwCfgTempSensorsErrorSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Setting the severity level of the error event of the
+        temperature control sensors for the operation of the protected
+        equipment."
+    ::= {elmCcuEquipPowerControl 6}
+
+elmCcuEquipPwOvrPowerState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Temporary assignment of the operating mode (does not change
+        the configuration and is not stored in ROM)."
+    ::= {elmCcuEquipPowerControl 10}
+
+elmCcuEquipPwCurPowerState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "The current power state of the equipment."
+    ::= {elmCcuEquipPowerControl 20}
+
+elmCcuEquipPwCurTempTresholdAlarmState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "The current state of the event of exceeding the operating
+        temperature of the protected equipment."
+    ::= {elmCcuEquipPowerControl 21}
+
+elmCcuEquipPwCurTempSensorsErrorState OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Conflict of indications or incorrect setting of sensors for
+        monitoring the temperature of operation of the protected equipment."
+    ::= {elmCcuEquipPowerControl 22}
+
+elmCcuRackLightControl OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Lighting control."
+    ::= {elmCcu1001 7}
+
+elmCcuRackLightCfgSwitchOnByDoors OBJECT-TYPE
+    SYNTAX       YesNo
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Automatically turn on the light when the door is opened."
+    ::= {elmCcuRackLightControl 1}
+
+elmCcuRackCfgSwitchOffByTime OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Automatically turn off lights after X minutes."
+    ::= {elmCcuRackLightControl 2}
+
+elmCcuRackLightCurState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Lighting state."
+    ::= {elmCcuRackLightControl 3}
+
+END

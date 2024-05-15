@@ -1,0 +1,566 @@
+ELEMY-IPDU-PIC-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+    Unsigned32, Integer32
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, DisplayString
+        FROM SNMPv2-TC
+    OnOff, UFloat16x100, UFloat16x1000, ContactType,
+    NoneOnOff, Float16x10, elmIpdu
+        FROM ELEMY-MIB
+    SnmpAdminString
+        FROM SNMP-FRAMEWORK-MIB;
+-- END IMPORTS
+
+
+elmIpduPic MODULE-IDENTITY
+    LAST-UPDATED "202304281140Z"
+    ORGANIZATION "Elemy LLC"
+    CONTACT-INFO "Voronov Vadim"
+    DESCRIPTION  "Intelligent Power Distribution Unit IPDU"
+    REVISION "202304281140Z"
+    DESCRIPTION  ""
+    ::= {elmIpdu 1}
+
+-- *****************************************************************************
+-- Shared Types
+-- *****************************************************************************
+
+CommStatus ::= INTEGER {
+    ok             (0),
+    unavailable    (1),
+    noRefreshData  (2),
+    noDataCrcError (3),
+    noInvalidData  (4)
+}
+
+SensorStatus ::= INTEGER {
+    disabled  (0),
+    ok        (1),
+    noAnswer  (2),
+    readError (3),
+    lineError (4)
+}
+
+SensorValueStatus ::= INTEGER {
+    invalid (0),
+    normal  (1),
+    low     (2),
+    high    (3)
+}
+
+SensorValueUnits ::= INTEGER {
+    vlt  (1),
+    kvt  (2),
+    amp  (3),
+    kva  (4),
+    wtt  (5),
+    kwt  (6),
+    kwh  (7),
+    mwh  (8),
+    kvr  (9),
+    kvrh (10),
+    mvrh (11),
+    ohm  (12),
+    htz  (13),
+    cosf (14),
+    cel  (15),
+    hum  (16)
+}
+
+PowerInputState ::= INTEGER {
+    ok       (0),
+    fault    (1),
+    noPower  (2),
+    low      (3),
+    high     (4),
+    overload (5)
+}
+
+AlarmSeverity ::= INTEGER {
+    event (1),
+    alarm (2)
+}
+
+AlarmState ::= INTEGER {
+    none  (0),
+    event (1),
+    alarm (2)
+}
+
+-- *****************************************************************************
+-- Objects
+-- *****************************************************************************
+
+elmIpduStatus OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Device status"
+    ::= {elmIpduPic 1}
+
+elmIpduCommStatus OBJECT-TYPE
+    SYNTAX       CommStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Статус коммуникации модулей"
+    ::= {elmIpduStatus 1}
+
+elmIpduAlarm OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Авария"
+    ::= {elmIpduStatus 2}
+
+elmIpduTraps OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Настройка трапов"
+    ::= {elmIpduPic 2}
+
+
+elmIpduDefTraps OBJECT IDENTIFIER
+    ::= {elmIpduTraps 1}
+
+elmIpduTrapPowerLost NOTIFICATION-TYPE
+    STATUS       current
+    DESCRIPTION  "Lost power to all inputs"
+    ::= {elmIpduDefTraps 1}
+
+elmIpduTrapPowerInputState NOTIFICATION-TYPE
+    OBJECTS      {elmIpduPowerInputState}
+    STATUS       current
+    DESCRIPTION  "Power input state changed"
+    ::= {elmIpduDefTraps 2}
+
+elmIpduTrapPowerOutletsGroupState NOTIFICATION-TYPE
+    OBJECTS      {elmIpduPowerOutletsGroupState}
+    STATUS       current
+    DESCRIPTION  "Outlet group state changed"
+    ::= {elmIpduDefTraps 3}
+
+elmIpduTrapDiState NOTIFICATION-TYPE
+    OBJECTS      {elmIpduDiCurState, elmIpduDiCurAlarm}
+    STATUS       current
+    DESCRIPTION  "Digital input state changed"
+    ::= {elmIpduDefTraps 4}
+
+elmIpduTrapAlarm NOTIFICATION-TYPE
+    OBJECTS      {elmIpduAlarm}
+    STATUS       current
+    DESCRIPTION  "Alarm state changed"
+    ::= {elmIpduDefTraps 5}
+
+elmIpduTrapCommStatus NOTIFICATION-TYPE
+    OBJECTS      {elmIpduCommStatus}
+    STATUS       current
+    DESCRIPTION  "Communication status changed"
+    ::= {elmIpduDefTraps 6}
+
+elmIpduPowerInputs OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Power input"
+    ::= {elmIpduPic 3}
+
+elmIpduPowerInputsCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Count of power inputs"
+    ::= {elmIpduPowerInputs 1}
+
+elmIpduPowerInputsTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmIpduPowerInputEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Power inputs table"
+    ::= {elmIpduPowerInputs 2}
+
+elmIpduPowerInputEntry OBJECT-TYPE
+    SYNTAX       ElmIpduPowerInputEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmIpduPowerInputIndex}
+    ::= {elmIpduPowerInputsTable 1}
+
+ElmIpduPowerInputEntry ::= SEQUENCE {
+    elmIpduPowerInputIndex    Unsigned32,
+    elmIpduPowerInputMinP     Unsigned32,
+    elmIpduPowerInputMaxP     Unsigned32,
+    elmIpduPowerInputState    PowerInputState,
+    elmIpduPowerInputU        UFloat16x100,
+    elmIpduPowerInputI        UFloat16x100,
+    elmIpduPowerInputF        UFloat16x1000,
+    elmIpduPowerInputP        Integer32,
+    elmIpduPowerInputQ        Integer32,
+    elmIpduPowerInputEnergyP  Unsigned32,
+    elmIpduPowerInputEnergyQ  Unsigned32
+}
+
+elmIpduPowerInputIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Power inputs index"
+    ::= {elmIpduPowerInputEntry 1}
+
+elmIpduPowerInputMinP OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Active power low set point"
+    ::= {elmIpduPowerInputEntry 2}
+
+elmIpduPowerInputMaxP OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Active power high set point"
+    ::= {elmIpduPowerInputEntry 3}
+
+elmIpduPowerInputState OBJECT-TYPE
+    SYNTAX       PowerInputState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power input status"
+    ::= {elmIpduPowerInputEntry 4}
+
+elmIpduPowerInputU OBJECT-TYPE
+    SYNTAX       UFloat16x100
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power voltage"
+    ::= {elmIpduPowerInputEntry 5}
+
+elmIpduPowerInputI OBJECT-TYPE
+    SYNTAX       UFloat16x100
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power current"
+    ::= {elmIpduPowerInputEntry 6}
+
+elmIpduPowerInputF OBJECT-TYPE
+    SYNTAX       UFloat16x1000
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power Frequency"
+    ::= {elmIpduPowerInputEntry 7}
+
+elmIpduPowerInputP OBJECT-TYPE
+    SYNTAX       Integer32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Active power"
+    ::= {elmIpduPowerInputEntry 8}
+
+elmIpduPowerInputQ OBJECT-TYPE
+    SYNTAX       Integer32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Reactive power"
+    ::= {elmIpduPowerInputEntry 9}
+
+elmIpduPowerInputEnergyP OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Accumulated active power"
+    ::= {elmIpduPowerInputEntry 10}
+
+elmIpduPowerInputEnergyQ OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Accumulated reactive power"
+    ::= {elmIpduPowerInputEntry 11}
+
+
+elmIpduPowerOutlets OBJECT IDENTIFIER
+    ::= {elmIpduPic 4}
+
+elmIpduPowerOutletsBlockCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Count of power outlet blocks"
+    ::= {elmIpduPowerOutlets 1}
+
+elmIpduPowerOutletsBlockTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmIpduPowerOutletsGroupEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Power outlet blocks."
+    ::= {elmIpduPowerOutlets 2}
+
+elmIpduPowerOutletsGroupEntry OBJECT-TYPE
+    SYNTAX       ElmIpduPowerOutletsGroupEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmIpduPowerOutletsBlockIndex}
+    ::= {elmIpduPowerOutletsBlockTable 1}
+
+ElmIpduPowerOutletsGroupEntry ::= SEQUENCE {
+    elmIpduPowerOutletsBlockIndex  Unsigned32,
+    elmIpduPowerOutletsGroupPhase  Unsigned32,
+    elmIpduPowerOutletsGroupState  OnOff
+}
+
+elmIpduPowerOutletsBlockIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "index"
+    ::= {elmIpduPowerOutletsGroupEntry 1}
+
+elmIpduPowerOutletsGroupPhase OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power Input index"
+    ::= {elmIpduPowerOutletsGroupEntry 2}
+
+elmIpduPowerOutletsGroupState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "on/off"
+    ::= {elmIpduPowerOutletsGroupEntry 3}
+
+elmIpduPowerOutletsCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Count of power outlets"
+    ::= {elmIpduPowerOutlets 3}
+
+elmIpduPowerOutletsTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmIpduPowerOutletEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Power outlets."
+    ::= {elmIpduPowerOutlets 4}
+
+elmIpduPowerOutletEntry OBJECT-TYPE
+    SYNTAX       ElmIpduPowerOutletEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmIpduPowerOutletPhase, elmIpduPowerOutletIndex}
+    ::= {elmIpduPowerOutletsTable 1}
+
+ElmIpduPowerOutletEntry ::= SEQUENCE {
+    elmIpduPowerOutletIndex  Unsigned32,
+    elmIpduPowerOutletPhase  Unsigned32,
+    elmIpduPowerOutletDesc   DisplayString,
+    elmIpduPowerOutletState  OnOff
+}
+
+elmIpduPowerOutletIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "index"
+    ::= {elmIpduPowerOutletEntry 1}
+
+elmIpduPowerOutletPhase OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Power Input index"
+    ::= {elmIpduPowerOutletEntry 2}
+
+elmIpduPowerOutletDesc OBJECT-TYPE
+    SYNTAX       DisplayString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Outlet description"
+    ::= {elmIpduPowerOutletEntry 3}
+
+elmIpduPowerOutletState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "power on/off"
+    ::= {elmIpduPowerOutletEntry 4}
+
+
+elmIpduIo OBJECT IDENTIFIER
+    ::= {elmIpduPic 5}
+
+elmIpduDiCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Number of digital inputs."
+    ::= {elmIpduIo 3}
+
+elmIpduDiTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmIpduDiEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Digital inputs table."
+    ::= {elmIpduIo 4}
+
+elmIpduDiEntry OBJECT-TYPE
+    SYNTAX       ElmIpduDiEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmIpduDiIndex}
+    ::= {elmIpduDiTable 1}
+
+ElmIpduDiEntry ::= SEQUENCE {
+    elmIpduDiIndex             Unsigned32,
+    elmIpduDiCfgName           SnmpAdminString,
+    elmIpduDiCfgType           ContactType,
+    elmIpduDiCfgNormalState    NoneOnOff,
+    elmIpduDiCfgAlarmSeverity  AlarmSeverity,
+    elmIpduDiCurValue          OnOff,
+    elmIpduDiCurState          OnOff,
+    elmIpduDiCurAlarm          AlarmState
+}
+
+elmIpduDiIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Индекс входа."
+    ::= {elmIpduDiEntry 1}
+
+elmIpduDiCfgName OBJECT-TYPE
+    SYNTAX       SnmpAdminString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input name."
+    ::= {elmIpduDiEntry 2}
+
+elmIpduDiCfgType OBJECT-TYPE
+    SYNTAX       ContactType
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input contact type."
+    ::= {elmIpduDiEntry 3}
+
+elmIpduDiCfgNormalState OBJECT-TYPE
+    SYNTAX       NoneOnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input normal state."
+    ::= {elmIpduDiEntry 4}
+
+elmIpduDiCfgAlarmSeverity OBJECT-TYPE
+    SYNTAX       AlarmSeverity
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input alarm severity."
+    ::= {elmIpduDiEntry 5}
+
+elmIpduDiCurValue OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input phisical state."
+    ::= {elmIpduDiEntry 6}
+
+elmIpduDiCurState OBJECT-TYPE
+    SYNTAX       OnOff
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input logic state (considering contact type)."
+    ::= {elmIpduDiEntry 7}
+
+elmIpduDiCurAlarm OBJECT-TYPE
+    SYNTAX       AlarmState
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Digital input Alarm status."
+    ::= {elmIpduDiEntry 8}
+
+elmIpduSensors OBJECT-IDENTITY
+    STATUS       current
+    DESCRIPTION  "Датчики устройства"
+    ::= {elmIpduPic 6}
+
+elmIpduSensorsCount OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Количество датчиков."
+    ::= {elmIpduSensors 1}
+
+elmIpduSensorsTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF ElmIpduSensorEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Таблица датчиков."
+    ::= {elmIpduSensors 2}
+
+elmIpduSensorEntry OBJECT-TYPE
+    SYNTAX       ElmIpduSensorEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  ""
+    INDEX        {elmIpduSensorIndex, elmIpduSensorValueIndex}
+    ::= {elmIpduSensorsTable 1}
+
+ElmIpduSensorEntry ::= SEQUENCE {
+    elmIpduSensorIndex        Unsigned32,
+    elmIpduSensorValueIndex   Unsigned32,
+    elmIpduSensorName         DisplayString,
+    elmIpduSensorStatus       SensorStatus,
+    elmIpduSensorValueStatus  SensorValueStatus,
+    elmIpduSensorValue        Float16x10,
+    elmIpduSensorValueUnits   SensorValueUnits
+}
+
+elmIpduSensorIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Индекс датчика"
+    ::= {elmIpduSensorEntry 1}
+
+elmIpduSensorValueIndex OBJECT-TYPE
+    SYNTAX       Unsigned32
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Индекс показания датчика"
+    ::= {elmIpduSensorEntry 2}
+
+elmIpduSensorName OBJECT-TYPE
+    SYNTAX       DisplayString
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Наименование датчика"
+    ::= {elmIpduSensorEntry 3}
+
+elmIpduSensorStatus OBJECT-TYPE
+    SYNTAX       SensorStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Текущий статус датчика"
+    ::= {elmIpduSensorEntry 4}
+
+elmIpduSensorValueStatus OBJECT-TYPE
+    SYNTAX       SensorValueStatus
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Текущий статус показания датчика"
+    ::= {elmIpduSensorEntry 5}
+
+elmIpduSensorValue OBJECT-TYPE
+    SYNTAX       Float16x10
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Показание датчика"
+    ::= {elmIpduSensorEntry 6}
+
+elmIpduSensorValueUnits OBJECT-TYPE
+    SYNTAX       SensorValueUnits
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  "Единицы измерения показания"
+    ::= {elmIpduSensorEntry 7}
+
+END
