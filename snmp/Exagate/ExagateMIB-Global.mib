@@ -1,0 +1,89 @@
+EXAGATE-GLOBAL-REG DEFINITIONS ::= BEGIN
+IMPORTS OBJECT-TYPE, MODULE-IDENTITY, enterprises, Integer32, IpAddress FROM SNMPv2-SMI;
+	exagateGlobalModule MODULE-IDENTITY LAST-UPDATED "201105131737Z" ORGANIZATION "Exagate AŞ" CONTACT-INFO "www.exagate.com" DESCRIPTION "" ::= { enterprises 35483 }
+		products OBJECT IDENTIFIER ::= { exagateGlobalModule 1 }
+			devices OBJECT IDENTIFIER ::= { products 1 }			
+								
+				sysguard OBJECT IDENTIFIER ::= { devices 1 }
+					sysguardproductInfo OBJECT IDENTIFIER ::= { sysguard 1 }
+						sysguardsystemName OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION " " ::= { sysguardproductInfo 1 }
+						sysguardmodelName OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION " " ::= { sysguardproductInfo 2 }
+						sysguardbranchName OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION " " ::= { sysguardproductInfo 3 }
+						sysguardserial OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION " " ::= { sysguardproductInfo 4 }
+					sysguardconfig OBJECT IDENTIFIER ::= { sysguard 2 }
+						sysguardrestartSystem OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION " " ::= { sysguardconfig 1 }
+						sysguardgetConfig OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION " " ::= { sysguardconfig 2 }
+						sysguardcreateConfigFile OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION " " ::= { sysguardconfig 3 }
+					sysguardSensors OBJECT IDENTIFIER ::= { sysguard 3 }
+						sysguardSensorTable OBJECT-TYPE SYNTAX SEQUENCE OF sysguardSensorEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { sysguardSensors 1 }
+							sysguardSensorEntry OBJECT-TYPE SYNTAX sysguardSensorEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { sysguardSensorIndex } ::= { sysguardSensorTable 1 }
+								sysguardSensorEntry ::= SEQUENCE { 
+								sysguardSensorIndex Integer32,
+								sysguardSensorID Integer32, 
+								sysguardSensorName OCTET STRING, 
+								sysguardSensorValue Integer,
+								sysguardSensorIsAlarm Integer32, 								
+								sysguardSensorType Integer32,
+								sysguardSensorActive Integer32, 
+								sysguardSensorAlarmActive Integer32, 
+								sysguardSensorAddress Integer32, 
+								sysguardSensorCriticalMax Integer32, 
+								sysguardSensorCriticalMin Integer32, 
+								sysguardSensorAlarmMax Integer32, 
+								sysguardSensorAlarmMin Integer32, 
+								sysguardSensorHysterisis Integer32, 
+								sysguardSensorScale Integer32,
+								sysguardSensorUnit OCTET STRING
+								}
+								sysguardSensorIndex OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 1 }
+								sysguardSensorID OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 2 }
+								sysguardSensorName OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 3 }
+								sysguardSensorValue OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 4 }
+								sysguardSensorIsAlarm OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 5 }		
+								sysguardSensorType OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 6 }		
+								sysguardSensorActive OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 7 }								
+								sysguardSensorAlarmActive OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 8 }
+								sysguardSensorAddress OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 9 }
+								sysguardSensorCriticalMax OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 10 }
+								sysguardSensorCriticalMin OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 11 }
+								sysguardSensorAlarmMax OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 12 }
+								sysguardSensorAlarmMin OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 13 }
+								sysguardSensorHysterisis OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 14 }
+								sysguardSensorScale OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 15 }
+								sysguardSensorUnit OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { sysguardSensorEntry 16 }								
+						
+				configuration OBJECT IDENTIFIER ::= { devices 2 }
+				sysguardmisc OBJECT IDENTIFIER ::= { configuration 1 }
+				sysguardConfigurationForSmartpack OBJECT IDENTIFIER ::= { configuration 2 }
+						sysguardrestartSystem OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION " " ::= { sysguardConfigurationForSmartpack 1 }
+						sysguardgetConfig OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION " " ::= { sysguardConfigurationForSmartpack 2 }
+						sysguardcreateConfigFile OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-write STATUS current DESCRIPTION " " ::= { sysguardConfigurationForSmartpack 3 }
+		
+		notifications OBJECT IDENTIFIER ::= { exagateGlobalModule 2 }
+			naTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor is not available" ::= { notifications 1 }
+			returnFromNaTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor is available again" ::= { notifications 2 }
+			criticalTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is critical" ::= { notifications 3 }
+			returnFromCriticalTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is not critical again" ::= { notifications 4 }
+			alarmTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is alarm" ::= { notifications 5 }
+			returnFromAlarmTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is not alarm again" ::= { notifications 6 }
+			sensorValueChangedTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value has changed" ::= { notifications 7 }
+			walkRequestedTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor settings have changed" ::= { notifications 8 }
+			changeInConfigTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Configuration changed." ::= { notifications 9 }
+			startBatteryTestTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Start battery test." ::= { notifications 10 }
+			stopBatteryTestTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Stop battery test." ::= { notifications 11 }
+			selfCheckReadyTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Self check report ready." ::= { notifications 12 }
+			newWalkRequestTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Walk requested." ::= { notifications 13 }
+			heartbeatTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Heartbeat Trap." ::= { notifications 14 }
+		serverNotifications OBJECT IDENTIFIER ::= { exagateGlobalModule 3 }
+			naServerTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor is not available" ::= { serverNotifications 1 }
+			returnFromNaServerTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor is available again" ::= { serverNotifications 2 }
+			criticalServerTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is critical" ::= { serverNotifications 3 }
+			returnFromCriticalServerTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is not critical again" ::= { serverNotifications 4 }
+			alarmServerTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is alarm" ::= { serverNotifications 5 }
+			returnFromAlarmServerTrap NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is not alarm again" ::= { serverNotifications 6 }
+			dramaticValueChange NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is dramatically increased or decreased" ::= { serverNotifications 7 }
+		trapVarBinds OBJECT IDENTIFIER ::= { exagateGlobalModule 4 }
+			trapUniqueID OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "trapUniqueID" ::= { trapVarBinds 1 }
+		
+		
+END
