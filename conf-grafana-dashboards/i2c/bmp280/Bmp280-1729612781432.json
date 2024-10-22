@@ -145,7 +145,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB-119}"
           },
-          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_temp\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value * 0.01 })) \r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_temp\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value / float(v: r[\"multiplier\"])}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -232,7 +232,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB-119}"
           },
-          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_humidity\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value * 0.01 })) \r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_humidity\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value / float(v: r[\"multiplier\"])}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -319,7 +319,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB-119}"
           },
-          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_pressure\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value * 0.01 })) \r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_pressure\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value / float(v: r[\"multiplier\"])}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -441,7 +441,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB-119}"
           },
-          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_temp\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value * 0.01 })) \r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_temp\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value / float(v: r[\"multiplier\"])}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -563,7 +563,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB-119}"
           },
-          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_humidity\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value * 0.01 })) \r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_humidity\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value / float(v: r[\"multiplier\"])}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -685,7 +685,7 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB-119}"
           },
-          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_pressure\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value * 0.01 })) \r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
+          "query": "from(bucket: \"${buckets}\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"${measurements}\")\r\n  |> filter(fn: (r) => r[\"host\"] == \"${host}\")\r\n  |> filter(fn: (r) => r[\"name\"] == \"${device}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"bmp280_pressure\")\r\n  |> toFloat()\r\n  |> map(fn: (r) => ({ r with _value: r._value / float(v: r[\"multiplier\"])}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\r\n  |> yield(name: \"last\")",
           "refId": "A"
         }
       ],
@@ -784,6 +784,6 @@
   "timezone": "",
   "title": "Bmp280",
   "uid": "cbf62f7b-a536-4572-ab0c-18a725e79bcf71",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
