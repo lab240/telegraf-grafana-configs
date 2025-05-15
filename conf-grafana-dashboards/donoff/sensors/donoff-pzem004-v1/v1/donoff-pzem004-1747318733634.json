@@ -1,0 +1,1310 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB-NNZ",
+      "label": "InfluxDB-nnz",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    },
+    {
+      "name": "VAR_CURRENT_PH1",
+      "type": "constant",
+      "label": "current_ph1",
+      "value": "sct013_1",
+      "description": ""
+    },
+    {
+      "name": "VAR_CURRENT_PH2",
+      "type": "constant",
+      "label": "current_ph2",
+      "value": "sct013_2",
+      "description": ""
+    },
+    {
+      "name": "VAR_CURRENT_PH3",
+      "type": "constant",
+      "label": "current_ph3",
+      "value": "sct013_3",
+      "description": ""
+    },
+    {
+      "name": "VAR_CURRENT_SUMM",
+      "type": "constant",
+      "label": "current_summ",
+      "value": "sct013x3",
+      "description": ""
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.6.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "Если есть описание что это, пишем в запросе",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 15,
+        "x": 0,
+        "y": 0
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -1m)\n  |> filter(fn: (r) =>\n    r.dev == \"${dev_current}\"\n  )\n  |> map(fn: (r) => {\n  d = string(v: r.dev)\n  label =\n    if d == \"t14\" then \"${t14}\"\n    else \"no decr\"\n    \n\n  return { r with dev_label1: d+\"->\"+label }\n})\n|> keep(columns: [\"dev_label1\"])",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "Девайс: ${dev}",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "${_field.name}",
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 20,
+          "min": 0,
+          "noValue": "NO-DATA",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 5
+              },
+              {
+                "color": "super-light-yellow",
+                "value": 10
+              },
+              {
+                "color": "orange",
+                "value": 16
+              },
+              {
+                "color": "dark-red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 0,
+        "y": 2
+      },
+      "id": 23,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "text": {
+          "titleSize": 1
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "  from(bucket: \"bucket1\")\r\n  |> range(start: -60s)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.prj == \"${project}\" and\r\n    r.dev == \"${dev_current}\" and\r\n    r._field == \"pzem_current\"\r\n  )\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\r\n  |>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Current PZEM",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "thresholds",
+            "seriesBy": "min"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "displayName": "${__field.name}",
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "dark-green",
+                "value": 5
+              },
+              {
+                "color": "dark-yellow",
+                "value": 16
+              },
+              {
+                "color": "dark-orange",
+                "value": 20
+              },
+              {
+                "color": "dark-red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 4,
+        "y": 2
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.prj == \"${project}\" and\r\n    r.dev == \"${dev_current}\" and\r\n    r._field == \"pzem_current\" \r\n  )\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"current1\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "hide": false,
+          "query": "",
+          "refId": "B"
+        }
+      ],
+      "title": "Current PZEM",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "${_field.name}",
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 5000,
+          "min": 0,
+          "noValue": "NO-DATA",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "dark-green",
+                "value": 230
+              },
+              {
+                "color": "blue",
+                "value": 1000
+              },
+              {
+                "color": "#EAB839",
+                "value": 5000
+              },
+              {
+                "color": "red",
+                "value": 10000
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 0,
+        "y": 9
+      },
+      "id": 26,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "text": {
+          "titleSize": 1
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "  from(bucket: \"bucket1\")\r\n  |> range(start: -60s)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.prj == \"${project}\" and\r\n    r.dev == \"${dev_current}\" and\r\n    r._field == \"pzem_power\"\r\n  )\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\r\n  |>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "PZEM POWER",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "${_field.name}",
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 5000,
+          "min": 0,
+          "noValue": "NO-DATA",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "dark-green",
+                "value": 230
+              },
+              {
+                "color": "blue",
+                "value": 1000
+              },
+              {
+                "color": "#EAB839",
+                "value": 5000
+              },
+              {
+                "color": "red",
+                "value": 10000
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 4,
+        "y": 9
+      },
+      "id": 27,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.prj == \"${project}\" and\r\n    r.dev == \"${dev_current}\" and\r\n    r._field == \"pzem_power\" \r\n  )\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"current1\")",
+          "refId": "A"
+        }
+      ],
+      "title": "PZEM POWER",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "${_field.name}",
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 250,
+          "min": 0,
+          "noValue": "NO-DATA",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-red",
+                "value": 5
+              },
+              {
+                "color": "green",
+                "value": 200
+              },
+              {
+                "color": "dark-green",
+                "value": 230
+              },
+              {
+                "color": "blue",
+                "value": 250
+              }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 0,
+        "y": 16
+      },
+      "id": 24,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "text": {
+          "titleSize": 1
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "  from(bucket: \"bucket1\")\r\n  |> range(start: -60s)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.prj == \"${project}\" and\r\n    r.dev == \"${dev_current}\" and\r\n    r._field == \"pzem_voltage\"\r\n  )\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\r\n  |>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "PZEM Volt",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "${_field.name}",
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 250,
+          "min": 0,
+          "noValue": "NO-DATA",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-red",
+                "value": 5
+              },
+              {
+                "color": "green",
+                "value": 200
+              },
+              {
+                "color": "dark-green",
+                "value": 230
+              },
+              {
+                "color": "blue",
+                "value": 250
+              }
+            ]
+          },
+          "unit": "volt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 4,
+        "y": 16
+      },
+      "id": 25,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.prj == \"${project}\" and\r\n    r.dev == \"${dev_current}\" and\r\n    r._field == \"pzem_voltage\" \r\n  )\r\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"current1\")",
+          "refId": "A"
+        }
+      ],
+      "title": "PZEM Volt",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "buckets()",
+        "hide": 2,
+        "includeAll": false,
+        "name": "buckets",
+        "options": [],
+        "query": "buckets()",
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9]/",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "import \"influxdata/influxdb/schema\"\r\n\r\nschema.measurements(bucket: \"${buckets}\")",
+        "hide": 2,
+        "includeAll": false,
+        "name": "measurements",
+        "options": [],
+        "query": "import \"influxdata/influxdb/schema\"\r\n\r\nschema.measurements(bucket: \"${buckets}\")",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "import \"influxdata/influxdb/schema\"\r\n\r\nschema.measurementTagValues(\r\n    bucket: \"${buckets}\",\r\n    tag: \"host\",\r\n    measurement: \"${measurements}\",\r\n)",
+        "hide": 2,
+        "includeAll": false,
+        "name": "host",
+        "options": [],
+        "query": "import \"influxdata/influxdb/schema\"\r\n\r\nschema.measurementTagValues(\r\n    bucket: \"${buckets}\",\r\n    tag: \"host\",\r\n    measurement: \"${measurements}\",\r\n)",
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9]/",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "import \"influxdata/influxdb/schema\"\r\noption windowPeriod = 1m\r\n\r\nschema.measurementTagValues(\r\n  bucket: \"bucket1\",\r\n  measurement: \"sensors\",\r\n  tag: \"dev\"\r\n)\r\n",
+        "hide": 2,
+        "includeAll": false,
+        "name": "dev",
+        "options": [],
+        "query": {
+          "0": "i",
+          "1": "m",
+          "2": "p",
+          "3": "o",
+          "4": "r",
+          "5": "t",
+          "6": " ",
+          "7": "\"",
+          "8": "i",
+          "9": "n",
+          "10": "f",
+          "11": "l",
+          "12": "u",
+          "13": "x",
+          "14": "d",
+          "15": "a",
+          "16": "t",
+          "17": "a",
+          "18": "/",
+          "19": "i",
+          "20": "n",
+          "21": "f",
+          "22": "l",
+          "23": "u",
+          "24": "x",
+          "25": "d",
+          "26": "b",
+          "27": "/",
+          "28": "s",
+          "29": "c",
+          "30": "h",
+          "31": "e",
+          "32": "m",
+          "33": "a",
+          "34": "\"",
+          "35": "\r",
+          "36": "\n",
+          "37": "\r",
+          "38": "\n",
+          "39": "s",
+          "40": "c",
+          "41": "h",
+          "42": "e",
+          "43": "m",
+          "44": "a",
+          "45": ".",
+          "46": "m",
+          "47": "e",
+          "48": "a",
+          "49": "s",
+          "50": "u",
+          "51": "r",
+          "52": "e",
+          "53": "m",
+          "54": "e",
+          "55": "n",
+          "56": "t",
+          "57": "T",
+          "58": "a",
+          "59": "g",
+          "60": "V",
+          "61": "a",
+          "62": "l",
+          "63": "u",
+          "64": "e",
+          "65": "s",
+          "66": "(",
+          "67": "\r",
+          "68": "\n",
+          "69": " ",
+          "70": " ",
+          "71": " ",
+          "72": " ",
+          "73": "b",
+          "74": "u",
+          "75": "c",
+          "76": "k",
+          "77": "e",
+          "78": "t",
+          "79": ":",
+          "80": " ",
+          "81": "\"",
+          "82": "$",
+          "83": "{",
+          "84": "b",
+          "85": "u",
+          "86": "c",
+          "87": "k",
+          "88": "e",
+          "89": "t",
+          "90": "s",
+          "91": "}",
+          "92": "\"",
+          "93": ",",
+          "94": "\r",
+          "95": "\n",
+          "96": " ",
+          "97": " ",
+          "98": " ",
+          "99": " ",
+          "100": "t",
+          "101": "a",
+          "102": "g",
+          "103": ":",
+          "104": " ",
+          "105": "\"",
+          "106": "n",
+          "107": "a",
+          "108": "m",
+          "109": "e",
+          "110": "\"",
+          "111": ",",
+          "112": "\r",
+          "113": "\n",
+          "114": " ",
+          "115": " ",
+          "116": " ",
+          "117": " ",
+          "118": "m",
+          "119": "e",
+          "120": "a",
+          "121": "s",
+          "122": "u",
+          "123": "r",
+          "124": "e",
+          "125": "m",
+          "126": "e",
+          "127": "n",
+          "128": "t",
+          "129": ":",
+          "130": " ",
+          "131": "\"",
+          "132": "$",
+          "133": "{",
+          "134": "m",
+          "135": "e",
+          "136": "a",
+          "137": "s",
+          "138": "u",
+          "139": "r",
+          "140": "e",
+          "141": "m",
+          "142": "e",
+          "143": "n",
+          "144": "t",
+          "145": "s",
+          "146": "}",
+          "147": "\"",
+          "148": ",",
+          "149": "\r",
+          "150": "\n",
+          "151": ")",
+          "query": "import \"influxdata/influxdb/schema\"\r\noption windowPeriod = 1m\r\n\r\nschema.measurementTagValues(\r\n  bucket: \"bucket1\",\r\n  measurement: \"sensors\",\r\n  tag: \"dev\"\r\n)\r\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "from(bucket: \"bucket1\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.type == \"current\"\r\n  )\r\n  |> keep(columns: [\"dev\"])\r\n  |> group()\r\n  |> distinct(column: \"dev\")\r\n  |> sort(columns: [\"dev\"])",
+        "includeAll": false,
+        "name": "dev_current",
+        "options": [],
+        "query": {
+          "0": "i",
+          "1": "m",
+          "2": "p",
+          "3": "o",
+          "4": "r",
+          "5": "t",
+          "6": " ",
+          "7": "\"",
+          "8": "i",
+          "9": "n",
+          "10": "f",
+          "11": "l",
+          "12": "u",
+          "13": "x",
+          "14": "d",
+          "15": "a",
+          "16": "t",
+          "17": "a",
+          "18": "/",
+          "19": "i",
+          "20": "n",
+          "21": "f",
+          "22": "l",
+          "23": "u",
+          "24": "x",
+          "25": "d",
+          "26": "b",
+          "27": "/",
+          "28": "s",
+          "29": "c",
+          "30": "h",
+          "31": "e",
+          "32": "m",
+          "33": "a",
+          "34": "\"",
+          "35": "\r",
+          "36": "\n",
+          "37": "\r",
+          "38": "\n",
+          "39": "s",
+          "40": "c",
+          "41": "h",
+          "42": "e",
+          "43": "m",
+          "44": "a",
+          "45": ".",
+          "46": "m",
+          "47": "e",
+          "48": "a",
+          "49": "s",
+          "50": "u",
+          "51": "r",
+          "52": "e",
+          "53": "m",
+          "54": "e",
+          "55": "n",
+          "56": "t",
+          "57": "T",
+          "58": "a",
+          "59": "g",
+          "60": "V",
+          "61": "a",
+          "62": "l",
+          "63": "u",
+          "64": "e",
+          "65": "s",
+          "66": "(",
+          "67": "\r",
+          "68": "\n",
+          "69": " ",
+          "70": " ",
+          "71": " ",
+          "72": " ",
+          "73": "b",
+          "74": "u",
+          "75": "c",
+          "76": "k",
+          "77": "e",
+          "78": "t",
+          "79": ":",
+          "80": " ",
+          "81": "\"",
+          "82": "$",
+          "83": "{",
+          "84": "b",
+          "85": "u",
+          "86": "c",
+          "87": "k",
+          "88": "e",
+          "89": "t",
+          "90": "s",
+          "91": "}",
+          "92": "\"",
+          "93": ",",
+          "94": "\r",
+          "95": "\n",
+          "96": " ",
+          "97": " ",
+          "98": " ",
+          "99": " ",
+          "100": "t",
+          "101": "a",
+          "102": "g",
+          "103": ":",
+          "104": " ",
+          "105": "\"",
+          "106": "n",
+          "107": "a",
+          "108": "m",
+          "109": "e",
+          "110": "\"",
+          "111": ",",
+          "112": "\r",
+          "113": "\n",
+          "114": " ",
+          "115": " ",
+          "116": " ",
+          "117": " ",
+          "118": "m",
+          "119": "e",
+          "120": "a",
+          "121": "s",
+          "122": "u",
+          "123": "r",
+          "124": "e",
+          "125": "m",
+          "126": "e",
+          "127": "n",
+          "128": "t",
+          "129": ":",
+          "130": " ",
+          "131": "\"",
+          "132": "$",
+          "133": "{",
+          "134": "m",
+          "135": "e",
+          "136": "a",
+          "137": "s",
+          "138": "u",
+          "139": "r",
+          "140": "e",
+          "141": "m",
+          "142": "e",
+          "143": "n",
+          "144": "t",
+          "145": "s",
+          "146": "}",
+          "147": "\"",
+          "148": ",",
+          "149": "\r",
+          "150": "\n",
+          "151": ")",
+          "query": "from(bucket: \"bucket1\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"sensors\" and\r\n    r.type == \"current\"\r\n  )\r\n  |> keep(columns: [\"dev\"])\r\n  |> group()\r\n  |> distinct(column: \"dev\")\r\n  |> sort(columns: [\"dev\"])"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "ДМЖК: 3-х фазный вход",
+          "value": "ДМЖК: 3-х фазный вход"
+        },
+        "hide": 2,
+        "name": "dmzk16",
+        "options": [
+          {
+            "selected": true,
+            "text": "ДМЖК: 3-х фазный вход",
+            "value": "ДМЖК: 3-х фазный вход"
+          }
+        ],
+        "query": "ДМЖК: 3-х фазный вход",
+        "type": "custom"
+      },
+      {
+        "hide": 2,
+        "name": "current_ph1",
+        "query": "${VAR_CURRENT_PH1}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_CURRENT_PH1}",
+          "text": "${VAR_CURRENT_PH1}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_CURRENT_PH1}",
+            "text": "${VAR_CURRENT_PH1}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "hide": 2,
+        "name": "current_ph2",
+        "query": "${VAR_CURRENT_PH2}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_CURRENT_PH2}",
+          "text": "${VAR_CURRENT_PH2}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_CURRENT_PH2}",
+            "text": "${VAR_CURRENT_PH2}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "hide": 2,
+        "name": "current_ph3",
+        "query": "${VAR_CURRENT_PH3}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_CURRENT_PH3}",
+          "text": "${VAR_CURRENT_PH3}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_CURRENT_PH3}",
+            "text": "${VAR_CURRENT_PH3}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "hide": 2,
+        "name": "current_summ",
+        "query": "${VAR_CURRENT_SUMM}",
+        "skipUrlSync": true,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_CURRENT_SUMM}",
+          "text": "${VAR_CURRENT_SUMM}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_CURRENT_SUMM}",
+            "text": "${VAR_CURRENT_SUMM}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "current": {
+          "text": "donoff",
+          "value": "donoff"
+        },
+        "name": "project",
+        "options": [
+          {
+            "selected": true,
+            "text": "donoff",
+            "value": "donoff"
+          }
+        ],
+        "query": "donoff",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "Б41: Вход PZEM",
+          "value": "Б41: Вход PZEM"
+        },
+        "hide": 2,
+        "name": "t14",
+        "options": [
+          {
+            "selected": true,
+            "text": "Б41: Вход PZEM",
+            "value": "Б41: Вход PZEM"
+          }
+        ],
+        "query": "Б41: Вход PZEM",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "donoff-pzem004",
+  "uid": "cbf62f7b-a536-4572-ab0c-18a725e79bcf7-2",
+  "version": 8,
+  "weekStart": ""
+}

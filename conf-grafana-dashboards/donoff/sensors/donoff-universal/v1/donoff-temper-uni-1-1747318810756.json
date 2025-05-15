@@ -1,0 +1,1766 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB-NNZ",
+      "label": "InfluxDB-nnz",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.6.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "query": "",
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "Если есть описание что это, пишем в запросе",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 20,
+        "x": 0,
+        "y": 0
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -5m)\n  |> filter(fn: (r) =>\n    r.dev == \"${dev}\" and\n    r.prj == \"${project}\"\n  )\n  |> map(fn: (r) => {\n  d = string(v: r.dev)\n  label =\n    if d == \"dmzk10\" then \"${dmzk10}\"\n    else if d == \"h2\" then \"${h2}\"\n    else if d == \"dmzk15\" then \"${dmzk15}\"\n    else if d == \"tav1\" then \"${tav1}\"\n    else if d == \"dmzk13\" then \"${dmzk13}\"\n    else \"no decr\"\n    \n\n  return { r with dev_label1: d+\"->\"+label }\n})\n|> keep(columns: [\"dev_label1\"])",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "Device: ${dev}",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 5,
+        "x": 0,
+        "y": 2
+      },
+      "id": 22,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/^Time$/",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"time\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\"\n  )\n  |> filter(fn: (r) => r._field == \"time_up\")\n  |>last()",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "UP TIME",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "links": [],
+          "mappings": [],
+          "max": 60,
+          "min": -20,
+          "noValue": "NO DATA",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 10
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 35
+              },
+              {
+                "color": "dark-red",
+                "value": 45
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 5,
+        "y": 2
+      },
+      "id": 10,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "text": {}
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"temp_out\"\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  //>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "temp_out ",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "links": [],
+          "mappings": [],
+          "max": 60,
+          "min": 5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 30
+              },
+              {
+                "color": "dark-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 9,
+        "y": 2
+      },
+      "id": 11,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"temp_in\"\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n",
+          "refId": "A"
+        }
+      ],
+      "title": "temp_in (optional)",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 10,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Релюшки",
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": ""
+              },
+              {
+                "color": "dark-red",
+                "value": ""
+              }
+            ]
+          },
+          "unit": "bool_on_off"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 13,
+        "y": 2
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"relays\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" \n   )\n  |> filter(fn: (r) => r._field == \"r1\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"corrected_temp\")",
+          "refId": "A"
+        }
+      ],
+      "title": "r1",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "noValue": "NO RELAY",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bool_on_off"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 0,
+        "y": 4
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"relays\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\"\n  )\n  |> filter(fn: (r) => r._field == \"r1\")\n  |>last()",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "R1",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 2,
+        "y": 4
+      },
+      "id": 23,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^Time$/",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"time\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\"\n  )\n  |> filter(fn: (r) => r._field == \"time_comm\")\n  |>last()",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "R1 ON time",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "noValue": "NO RELAY",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bool_on_off"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 0,
+        "y": 6
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"relays\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\"\n  )\n  |> filter(fn: (r) => r._field == \"r2\")\n  |>last()",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "R2",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 2,
+        "y": 6
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^Time$/",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"time\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\"\n  )\n  |> filter(fn: (r) => r._field == \"time_down\")\n  |>last()",
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          }
+        }
+      ],
+      "title": "Relay1 OFF time",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "(optional)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "decimals": 2,
+          "links": [],
+          "mappings": [],
+          "max": 45,
+          "min": -30,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 30
+              },
+              {
+                "color": "dark-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 5,
+        "y": 7
+      },
+      "id": 12,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"temp_out2\"\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  //|>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "temp_out2  (optional)",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "links": [],
+          "mappings": [],
+          "max": 20,
+          "min": -10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 0
+              },
+              {
+                "color": "dark-orange",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 40
+              },
+              {
+                "color": "dark-red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 9,
+        "y": 7
+      },
+      "id": 14,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"temp_odd\"\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  //|>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "temp_odd (optional)",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 10,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Релюшки",
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green"
+              }
+            ]
+          },
+          "unit": "bool_on_off"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 13,
+        "y": 7
+      },
+      "id": 26,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"relays\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" \n   )\n  |> filter(fn: (r) => r._field == \"r2\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"corrected_temp\")",
+          "refId": "A"
+        }
+      ],
+      "title": "r2",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlRd",
+            "seriesBy": "last"
+          },
+          "links": [],
+          "mappings": [],
+          "max": 40,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 30
+              },
+              {
+                "color": "dark-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 0,
+        "y": 8
+      },
+      "id": 17,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: -30s)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"current\"\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  //|>last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Current (optional)",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Температура",
+          "fieldMinMax": false,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 30
+              },
+              {
+                "color": "dark-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 20,
+        "x": 0,
+        "y": 12
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"temp_out\" and\n    r._value != -12800 and\n    r._value != -12700\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"corrected_temp\")",
+          "refId": "A"
+        }
+      ],
+      "title": "temp_out",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 7,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Температура",
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 30
+              },
+              {
+                "color": "dark-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 20,
+        "x": 0,
+        "y": 19
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max",
+            "mean",
+            "diff"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"temp_out2\" and\n    r._value != -12800 and\n    r._value != -12700\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"corrected_temp\")",
+          "refId": "A"
+        }
+      ],
+      "title": "temp_out2 ",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB-NNZ}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 7,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "displayName": "Температура",
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "dark-yellow",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 30
+              },
+              {
+                "color": "dark-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 20,
+        "x": 0,
+        "y": 26
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max",
+            "mean",
+            "diff"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB-NNZ}"
+          },
+          "query": "from(bucket: \"bucket1\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"sensors\" and\n    r.prj == \"${project}\" and\n    r.dev == \"${dev}\" and\n    r._field == \"current\"\n  )\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / float(v: r.mult) }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"current\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Current",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 41,
+  "tags": [
+    "influxdb",
+    "IoT"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "buckets()",
+        "hide": 2,
+        "includeAll": false,
+        "name": "buckets",
+        "options": [],
+        "query": "buckets()",
+        "refresh": 1,
+        "regex": "/^[a-zA-Z0-9]/",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB-NNZ}"
+        },
+        "definition": "import \"influxdata/influxdb/schema\"\n\nschema.measurements(bucket: \"${buckets}\")",
+        "description": "",
+        "hide": 2,
+        "includeAll": false,
+        "name": "measurements",
+        "options": [],
+        "query": "import \"influxdata/influxdb/schema\"\n\nschema.measurements(bucket: \"${buckets}\")",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {},
+        "definition": "import \"influxdata/influxdb/schema\"\noption windowPeriod = 1m\n\nschema.measurementTagValues(\n  bucket: \"bucket1\",\n  measurement: \"sensors\",\n  tag: \"dev\"\n)\n",
+        "includeAll": false,
+        "label": "dev",
+        "name": "dev",
+        "options": [],
+        "query": {
+          "0": "i",
+          "1": "m",
+          "2": "p",
+          "3": "o",
+          "4": "r",
+          "5": "t",
+          "6": " ",
+          "7": "\"",
+          "8": "i",
+          "9": "n",
+          "10": "f",
+          "11": "l",
+          "12": "u",
+          "13": "x",
+          "14": "d",
+          "15": "a",
+          "16": "t",
+          "17": "a",
+          "18": "/",
+          "19": "i",
+          "20": "n",
+          "21": "f",
+          "22": "l",
+          "23": "u",
+          "24": "x",
+          "25": "d",
+          "26": "b",
+          "27": "/",
+          "28": "s",
+          "29": "c",
+          "30": "h",
+          "31": "e",
+          "32": "m",
+          "33": "a",
+          "34": "\"",
+          "35": "\n",
+          "36": "\n",
+          "37": "s",
+          "38": "c",
+          "39": "h",
+          "40": "e",
+          "41": "m",
+          "42": "a",
+          "43": ".",
+          "44": "m",
+          "45": "e",
+          "46": "a",
+          "47": "s",
+          "48": "u",
+          "49": "r",
+          "50": "e",
+          "51": "m",
+          "52": "e",
+          "53": "n",
+          "54": "t",
+          "55": "T",
+          "56": "a",
+          "57": "g",
+          "58": "V",
+          "59": "a",
+          "60": "l",
+          "61": "u",
+          "62": "e",
+          "63": "s",
+          "64": "(",
+          "65": "\n",
+          "66": " ",
+          "67": " ",
+          "68": " ",
+          "69": " ",
+          "70": "b",
+          "71": "u",
+          "72": "c",
+          "73": "k",
+          "74": "e",
+          "75": "t",
+          "76": ":",
+          "77": " ",
+          "78": "\"",
+          "79": "$",
+          "80": "{",
+          "81": "b",
+          "82": "u",
+          "83": "c",
+          "84": "k",
+          "85": "e",
+          "86": "t",
+          "87": "s",
+          "88": "}",
+          "89": "\"",
+          "90": ",",
+          "91": "\n",
+          "92": " ",
+          "93": " ",
+          "94": " ",
+          "95": " ",
+          "96": "t",
+          "97": "a",
+          "98": "g",
+          "99": ":",
+          "100": " ",
+          "101": "\"",
+          "102": "s",
+          "103": "e",
+          "104": "n",
+          "105": "s",
+          "106": "o",
+          "107": "r",
+          "108": "_",
+          "109": "i",
+          "110": "d",
+          "111": "\"",
+          "112": ",",
+          "113": "\n",
+          "114": " ",
+          "115": " ",
+          "116": " ",
+          "117": " ",
+          "118": "m",
+          "119": "e",
+          "120": "a",
+          "121": "s",
+          "122": "u",
+          "123": "r",
+          "124": "e",
+          "125": "m",
+          "126": "e",
+          "127": "n",
+          "128": "t",
+          "129": ":",
+          "130": " ",
+          "131": "\"",
+          "132": "$",
+          "133": "{",
+          "134": "m",
+          "135": "e",
+          "136": "a",
+          "137": "s",
+          "138": "u",
+          "139": "r",
+          "140": "e",
+          "141": "m",
+          "142": "e",
+          "143": "n",
+          "144": "t",
+          "145": "s",
+          "146": "}",
+          "147": "\"",
+          "148": ",",
+          "149": "\n",
+          "150": ")",
+          "query": "import \"influxdata/influxdb/schema\"\noption windowPeriod = 1m\n\nschema.measurementTagValues(\n  bucket: \"bucket1\",\n  measurement: \"sensors\",\n  tag: \"dev\"\n)\n"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "Теплица",
+          "value": "Теплица"
+        },
+        "description": "",
+        "hide": 2,
+        "includeAll": true,
+        "name": "dev_label",
+        "options": [
+          {
+            "selected": false,
+            "text": "dmzk10",
+            "value": "Деревня Розетка 1"
+          },
+          {
+            "selected": false,
+            "text": "dmzk11",
+            "value": "Хозблок"
+          },
+          {
+            "selected": true,
+            "text": "dmzk12",
+            "value": "Теплица"
+          }
+        ],
+        "query": "dmzk10  : Деревня Розетка 1, dmzk11  : Хозблок, dmzk12  : Теплица",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "ДМЖЕ:Кухня diff",
+          "value": "ДМЖЕ:Кухня diff"
+        },
+        "hide": 2,
+        "name": "dmzk10",
+        "options": [
+          {
+            "selected": true,
+            "text": "ДМЖЕ:Кухня diff",
+            "value": "ДМЖЕ:Кухня diff"
+          }
+        ],
+        "query": "ДМЖЕ:Кухня diff",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "ДМЖК:Кухня кондей",
+          "value": "ДМЖК:Кухня кондей"
+        },
+        "hide": 2,
+        "name": "dmzk15",
+        "options": [
+          {
+            "selected": true,
+            "text": "ДМЖК:Кухня кондей",
+            "value": "ДМЖК:Кухня кондей"
+          }
+        ],
+        "query": "ДМЖК:Кухня кондей",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "ДМЖК: Туалет двойной",
+          "value": "ДМЖК: Туалет двойной"
+        },
+        "hide": 2,
+        "name": "dmzk13",
+        "options": [
+          {
+            "selected": true,
+            "text": "ДМЖК: Туалет двойной",
+            "value": "ДМЖК: Туалет двойной"
+          }
+        ],
+        "query": "ДМЖК: Туалет двойной",
+        "type": "custom"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "ДМЖК: Станция воды в душе",
+          "value": "ДМЖК: Станция воды в душе"
+        },
+        "hide": 2,
+        "name": "h2",
+        "options": [
+          {
+            "selected": true,
+            "text": "ДМЖК: Станция воды в душе",
+            "value": "ДМЖК: Станция воды в душе"
+          }
+        ],
+        "query": "ДМЖК: Станция воды в душе",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "Салют: Полив и куб.",
+          "value": "Салют: Полив и куб."
+        },
+        "hide": 2,
+        "name": "tav1",
+        "options": [
+          {
+            "selected": true,
+            "text": "Салют: Полив и куб.",
+            "value": "Салют: Полив и куб."
+          }
+        ],
+        "query": "Салют: Полив и куб.",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "donoff",
+          "value": "donoff"
+        },
+        "hide": 2,
+        "name": "project",
+        "options": [
+          {
+            "selected": true,
+            "text": "donoff",
+            "value": "donoff"
+          }
+        ],
+        "query": "donoff",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "donoff-temper-uni-1",
+  "uid": "1sWR2ounz",
+  "version": 97,
+  "weekStart": ""
+}
