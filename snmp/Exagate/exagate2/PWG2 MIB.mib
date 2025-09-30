@@ -1,0 +1,298 @@
+EXAGATE-GLOBAL-REG DEFINITIONS ::= BEGIN
+IMPORTS OBJECT-TYPE, MODULE-IDENTITY, enterprises, Integer32, IpAddress FROM SNMPv2-SMI;
+	exagateGlobalModule MODULE-IDENTITY LAST-UPDATED "202504091907Z" ORGANIZATION "EXAGATE" CONTACT-INFO "www.exagate.com" DESCRIPTION "" ::= { enterprises 35483 }
+		V2 OBJECT IDENTIFIER ::= { exagateGlobalModule 5 }
+			info 		OBJECT IDENTIFIER 	::= { V2 1 }
+				numberOfDevices OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "Number Of Devices" ::= { info 1 }
+				commonInfo 		OBJECT IDENTIFIER 	::= { info 2 }
+					commonInfoTable OBJECT-TYPE SYNTAX SEQUENCE OF commonInfoEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { commonInfo 1 }
+						commonInfoEntry OBJECT-TYPE SYNTAX commonInfoEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device } ::= { commonInfoTable 1 }
+							commonInfoEntry ::= SEQUENCE {  
+							deviceType 		Integer32,
+							swVer 			OCTET STRING,
+							fwVer 			OCTET STRING,
+							deviceModel 	OCTET STRING,
+							systemName 		OCTET STRING,
+							serialNo 		OCTET STRING, 		
+							partNumber 		OCTET STRING, 
+							manufacturer 	OCTET STRING,
+							macAddress1 	OCTET STRING, 
+							macAddress2 	OCTET STRING,							
+							}
+							deviceType 		OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 2 }
+							swVer 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 3 }
+							fwVer 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 4 }	
+							deviceModel 	OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 5 }	
+							systemName 		OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 6 }
+							serialNo 		OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 7 }		
+							partNumber 		OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 8 }
+							manufacturer 	OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 9 }
+							macAddress1 	OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 10}
+							macAddress2 	OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { commonInfoEntry 11}
+				pduInfo 		OBJECT IDENTIFIER 	::= { info 3 }
+					pduInfoTable OBJECT-TYPE SYNTAX SEQUENCE OF pduInfoEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { pduInfo 1 }
+						pduInfoEntry OBJECT-TYPE SYNTAX pduInfoEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device } ::= { pduInfoTable 1 }
+							pduInfoEntry ::= SEQUENCE {  
+							pduType 			Integer32,
+							phaseType 			Integer32,
+							inputCurrent 		Integer32,
+							numberOfTotals 		Integer32,
+							numberOfPhases 		Integer32,
+							numberOfCircuits	Integer32, 		
+							numberOfOutlets 	Integer32, 
+							numberOfSwitches 	Integer32,
+							numberOfInternals	Integer32, 
+							numberOfExternals 	Integer32,							
+							}
+							pduType 			OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 2 }
+							phaseType 			OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 3 }
+							inputCurrent 		OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 4 }	
+							numberOfTotals 		OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 5 }	
+							numberOfPhases 		OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 6 }
+							numberOfCircuits 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 7 }		
+							numberOfOutlets 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 8 }
+							numberOfSwitches 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 9 }
+							numberOfInternals 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 10}
+							numberOfExternals 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { pduInfoEntry 11}	
+				envMonInfo 		OBJECT IDENTIFIER 	::= { info 4 }
+					envMonInfoTable OBJECT-TYPE SYNTAX SEQUENCE OF envMonInfoEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { envMonInfo 1 }
+						envMonInfoEntry OBJECT-TYPE SYNTAX envMonInfoEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device } ::= { envMonInfoTable 1 }
+							envMonInfoEntry ::= SEQUENCE {  
+							envMonType 			Integer32,
+							numberOfInternals	Integer32, 
+							numberOfExternals 	Integer32,							
+							}
+							envMonType 			OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { envMonInfoEntry 2 }
+							numberOfInternals 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { envMonInfoEntry 3}
+							numberOfExternals 	OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "" ::= { envMonInfoEntry 4}							
+			sensors 	OBJECT IDENTIFIER 	::= { V2 2 }
+				ports 		OBJECT IDENTIFIER 	::= { sensors 1 }
+				circuits 	OBJECT IDENTIFIER 	::= { sensors 2 }
+				phases 		OBJECT IDENTIFIER 	::= { sensors 3 }
+				totals		OBJECT IDENTIFIER 	::= { sensors 4 }
+				switches	OBJECT IDENTIFIER 	::= { sensors 5 }
+				internals 	OBJECT IDENTIFIER 	::= { sensors 6 }
+				externals 	OBJECT IDENTIFIER 	::= { sensors 7 }
+					portsTable OBJECT-TYPE SYNTAX SEQUENCE OF portEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { ports 1 }
+							portEntry OBJECT-TYPE SYNTAX portEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { portsTable 1 }
+								portEntry ::= SEQUENCE {  
+								portName 				OCTET STRING, 
+								portValue 				Integer32,
+								portScale 				Integer32,
+								portActive 				Integer32,
+								portUnit 				OCTET STRING
+								portAlarmActive 		Integer32, 
+								portIsAlarm 			Integer32, 		
+								portCriticalMax 		Integer32, 
+								portCriticalMin 		Integer32, 
+								portAlarmMax 			Integer32, 
+								portAlarmMin 			Integer32,								
+								portHysterisis 			Integer32, 
+								}
+								portName 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 1  }
+								portValue 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 2  }
+								portScale 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { portEntry 3  }
+								portActive 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 4  }	
+								portUnit 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { portEntry 5  }	
+								portAlarmActive 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 6  }
+								portIsAlarm 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { portEntry 7  }		
+								portCriticalMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 8  }
+								portCriticalMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 9  }
+								portAlarmMax 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 10 }
+								portAlarmMin 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 11 }
+								portHysterisis 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { portEntry 12 }	
+					circuitsTable OBJECT-TYPE SYNTAX SEQUENCE OF circuitEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { circuits 1 }
+							circuitEntry OBJECT-TYPE SYNTAX circuitEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { circuitsTable 1 }
+								circuitEntry ::= SEQUENCE {  
+								circuitName 			OCTET STRING, 
+								circuitValue 			Integer32,
+								circuitScale 			Integer32,
+								circuitActive 			Integer32,
+								circuitUnit 			OCTET STRING
+								circuitAlarmActive 		Integer32, 
+								circuitIsAlarm 			Integer32, 		
+								circuitCriticalMax 		Integer32, 
+								circuitCriticalMin 		Integer32, 
+								circuitAlarmMax 		Integer32, 
+								circuitAlarmMin 		Integer32,								
+								circuitHysterisis 		Integer32,
+								}
+								circuitName 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 1  }
+								circuitValue 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 2  }
+								circuitScale 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { circuitEntry 3  }
+								circuitActive 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 4  }	
+								circuitUnit 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { circuitEntry 5  }	
+								circuitAlarmActive 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 6  }
+								circuitIsAlarm 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { circuitEntry 7  }		
+								circuitCriticalMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 8  }
+								circuitCriticalMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 9  }
+								circuitAlarmMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 10 }
+								circuitAlarmMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 11 }
+								circuitHysterisis 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { circuitEntry 12 }	
+					phasesTable OBJECT-TYPE SYNTAX SEQUENCE OF phaseEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { phases 1 }
+							phaseEntry OBJECT-TYPE SYNTAX phaseEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { phasesTable 1 }
+								phaseEntry ::= SEQUENCE {  
+								phaseName 				OCTET STRING, 
+								phaseValue 				Integer32,
+								phaseScale 				Integer32,
+								phaseActive 			Integer32,
+								phaseUnit 				OCTET STRING
+								phaseAlarmActive 		Integer32, 
+								phaseIsAlarm 			Integer32, 		
+								phaseCriticalMax 		Integer32, 
+								phaseCriticalMin 		Integer32, 
+								phaseAlarmMax 			Integer32, 
+								phaseAlarmMin 			Integer32,								
+								phaseHysterisis 		Integer32,
+								}
+								phaseName 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 1  }
+								phaseValue 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 2  }
+								phaseScale 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { phaseEntry 3  }
+								phaseActive 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 4  }	
+								phaseUnit 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { phaseEntry 5  }	
+								phaseAlarmActive 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 6  }
+								phaseIsAlarm 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { phaseEntry 7  }		
+								phaseCriticalMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 8  }
+								phaseCriticalMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 9  }
+								phaseAlarmMax 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 10 }
+								phaseAlarmMin 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 11 }
+								phaseHysterisis 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { phaseEntry 12 }
+					totalsTable OBJECT-TYPE SYNTAX SEQUENCE OF totalEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { totals 1 }
+							totalEntry OBJECT-TYPE SYNTAX totalEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { totalsTable 1 }
+								totalEntry ::= SEQUENCE {  
+								totalName 				OCTET STRING, 
+								totalValue 				Integer32,
+								totalScale 				Integer32,
+								totalActive 			Integer32,
+								totalUnit 				OCTET STRING
+								totalAlarmActive 		Integer32, 
+								totalIsAlarm 			Integer32, 		
+								totalCriticalMax 		Integer32, 
+								totalCriticalMin 		Integer32, 
+								totalAlarmMax 			Integer32, 
+								totalAlarmMin 			Integer32,								
+								totalHysterisis 		Integer32,
+								}
+								totalName 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 1  }
+								totalValue 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 2  }
+								totalScale 				OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { totalEntry 3  }
+								totalActive 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 4  }	
+								totalUnit 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { totalEntry 5  }	
+								totalAlarmActive 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 6  }
+								totalIsAlarm 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { totalEntry 7  }		
+								totalCriticalMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 8  }
+								totalCriticalMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 9  }
+								totalAlarmMax 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 10 }
+								totalAlarmMin 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 11 }
+								totalHysterisis 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { totalEntry 12 }
+					switchesTable OBJECT-TYPE SYNTAX SEQUENCE OF switchEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { switches 1 }
+							switchEntry OBJECT-TYPE SYNTAX switchEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { switchesTable 1 }
+								switchEntry ::= SEQUENCE {  
+								switchName 				OCTET STRING, 
+								switchValue 			Integer32,
+								switchScale 			Integer32,
+								switchActive 			Integer32,
+								switchUnit 				OCTET STRING
+								switchAlarmActive 		Integer32, 
+								switchIsAlarm 			Integer32, 		
+								switchCriticalMax 		Integer32, 
+								switchCriticalMin 		Integer32, 
+								switchAlarmMax 			Integer32, 
+								switchAlarmMin 			Integer32,								
+								switchHysterisis 		Integer32,
+								switchSensorType 		Integer32,								
+								switchSensorAddress 	Integer32, 
+								}
+								switchName 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 1  }
+								switchValue 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 2  }
+								switchScale 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { switchEntry 3  }
+								switchActive 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 4  }	
+								switchUnit 				OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { switchEntry 5  }	
+								switchAlarmActive 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 6  }
+								switchIsAlarm 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { switchEntry 7  }		
+								switchCriticalMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 8  }
+								switchCriticalMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 9  }
+								switchAlarmMax 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 10 }
+								switchAlarmMin 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 11 }
+								switchHysterisis 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 12 }
+								switchSensorType	 	OBJECT-TYPE SYNTAX Integer32	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { switchEntry 13 }
+								switchSensorAddress 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { switchEntry 14 }	
+					internalsTable OBJECT-TYPE SYNTAX SEQUENCE OF internalEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { internals 1 }
+							internalEntry OBJECT-TYPE SYNTAX internalEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { internalsTable 1 }
+								internalEntry ::= SEQUENCE {  
+								internalName 			OCTET STRING, 
+								internalValue 			Integer32,
+								internalScale 			Integer32,
+								internalActive 			Integer32,
+								internalUnit 			OCTET STRING
+								internalAlarmActive 	Integer32, 
+								internalIsAlarm 		Integer32, 		
+								internalCriticalMax 	Integer32, 
+								internalCriticalMin 	Integer32, 
+								internalAlarmMax 		Integer32, 
+								internalAlarmMin 		Integer32,								
+								internalHysterisis 		Integer32,
+								internalSensorType 		Integer32,								
+								internalSensorAddress 	Integer32, 
+								}
+								internalName 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 1  }
+								internalValue 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 2  }
+								internalScale 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { internalEntry 3  }
+								internalActive 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 4  }	
+								internalUnit 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { internalEntry 5  }	
+								internalAlarmActive 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 6  }
+								internalIsAlarm 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { internalEntry 7  }		
+								internalCriticalMax 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 8  }
+								internalCriticalMin 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 9  }
+								internalAlarmMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 10 }
+								internalAlarmMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 11 }
+								internalHysterisis 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 12 }
+								internalSensorType	 	OBJECT-TYPE SYNTAX Integer32	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { internalEntry 13 }
+								internalSensorAddress 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { internalEntry 14 }	
+					externalsTable OBJECT-TYPE SYNTAX SEQUENCE OF externalEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" ::= { externals 1 }
+							externalEntry OBJECT-TYPE SYNTAX externalEntry MAX-ACCESS not-accessible STATUS current DESCRIPTION "" INDEX { device, index ,type } ::= { externalsTable 1 }
+								externalEntry ::= SEQUENCE {  
+								externalName 			OCTET STRING, 
+								externalValue 			Integer32,
+								externalScale 			Integer32,
+								externalActive 			Integer32,
+								externalUnit 			OCTET STRING
+								externalAlarmActive 	Integer32, 
+								externalIsAlarm 		Integer32, 		
+								externalCriticalMax 	Integer32, 
+								externalCriticalMin 	Integer32, 
+								externalAlarmMax 		Integer32, 
+								externalAlarmMin 		Integer32,								
+								externalHysterisis 		Integer32,
+								externalSensorType 		Integer32,								
+								externalSensorAddress 	Integer32, 
+								}
+								externalName 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 1  }
+								externalValue 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 2  }
+								externalScale 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { externalEntry 3  }
+								externalActive 			OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 4  }	
+								externalUnit 			OBJECT-TYPE SYNTAX OCTET STRING MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { externalEntry 5  }	
+								externalAlarmActive 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 6  }
+								externalIsAlarm 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { externalEntry 7  }		
+								externalCriticalMax 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 8  }
+								externalCriticalMin 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 9  }
+								externalAlarmMax 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 10 }
+								externalAlarmMin 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 11 }
+								externalHysterisis 		OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 12 }
+								externalSensorType	 	OBJECT-TYPE SYNTAX Integer32	MAX-ACCESS read-write STATUS current DESCRIPTION "" ::= { externalEntry 13 }
+								externalSensorAddress 	OBJECT-TYPE SYNTAX Integer32 	MAX-ACCESS read-only  STATUS current DESCRIPTION "" ::= { externalEntry 14 }	
+			traps 	OBJECT IDENTIFIER 	::= { V2 3 }
+				trapTypes OBJECT IDENTIFIER ::= { traps 1 }
+					naTrap 					NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor is not available" 				::= { trapTypes 1 }
+					returnFromNaTrap 		NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor is available again" 			::= { trapTypes 2 }
+					criticalTrap 			NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is critical" 			::= { trapTypes 3 }
+					returnFromCriticalTrap 	NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is not critical again" 	::= { trapTypes 4 }
+					alarmTrap 				NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is alarm" 				::= { trapTypes 5 }
+					returnFromAlarmTrap 	NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value is not alarm again" 		::= { trapTypes 6 }
+					sensorValueChangedTrap 	NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor value has changed" 			::= { trapTypes 7 }
+					walkRequestedTrap 		NOTIFICATION-TYPE STATUS current DESCRIPTION "Sensor settings have changed" 		::= { trapTypes 8 }
+					heartbeatTrap 			NOTIFICATION-TYPE STATUS current DESCRIPTION "Heartbeat Trap." 						::= { trapTypes 14 }
+				trapVarBinds OBJECT IDENTIFIER ::= { traps 2 }
+					trapUniqueID OBJECT-TYPE SYNTAX Integer32 MAX-ACCESS read-only STATUS current DESCRIPTION "trapUniqueID" ::= { trapVarBinds 1 }
+			config 		OBJECT IDENTIFIER 	::= { V2 4 }
+END
